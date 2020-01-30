@@ -1,3 +1,5 @@
+import mock
+import datetime as dt
 from django.db.utils import IntegrityError
 
 from kaja.restaurant.models import Restaurant, Address, Chain
@@ -18,19 +20,31 @@ class TestRestaurantModel(TestBase):
 
     def test_restaurant_creates_default_chain(self):
         restaurant = Restaurant.objects.create(
-            address=self.address, name="Jazz Cafe", contact=self.restaurant_contact
+            address=self.address,
+            name="Jazz Cafe",
+            contact=self.restaurant_contact,
+            start_hour=dt.time(8, 00),
+            end_hour=dt.time(20, 00),
         )
         self.assertEqual(restaurant.chain.name, "Jazz Cafe Chain")
         self.assertEqual(restaurant.chain.owner, restaurant.contact)
 
     def test_cannot_add_restaurants_with_same_address(self):
-        Restaurant.objects.create(
-            address=self.address, name="JAzz", contact=self.restaurant_contact
-        )
+        self.make(Restaurant, address=self.address, name="JAzz", contact=self.restaurant_contact)
         with self.assertRaises(IntegrityError):
             Restaurant.objects.create(
                 address=self.address, name="Bistro", contact=self.restaurant_contact
             )
+
+    @mock.patch("kaja.restaurant.models.Restaurant._get_current_time")
+    def test_is_open_property(self, mock_datetime):
+        restaurant = self.make(Restaurant, start_hour=dt.time(8, 0), end_hour=dt.time(20, 0))
+        mock_datetime.return_value = dt.time(10, 0)
+        self.assertEqual(restaurant.is_open, True)
+        mock_datetime.return_value = dt.time(6, 0)
+        self.assertEqual(restaurant.is_open, False)
+        mock_datetime.return_value = dt.time(21, 0)
+        self.assertEqual(restaurant.is_open, False)
 
 
 class TestChainModel(TestBase):
@@ -55,13 +69,15 @@ class TestChainModel(TestBase):
         )
 
     def test_chain_can_have_multiple_restaurants(self):
-        Restaurant.objects.create(
+        self.make(
+            Restaurant,
             chain=self.chain,
             address=self.address,
             name="restaurant1",
             contact=self.restaurant_contact,
         )
-        Restaurant.objects.create(
+        self.make(
+            Restaurant,
             chain=self.chain,
             address=self.address2,
             name="restaurant2",

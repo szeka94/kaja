@@ -1,6 +1,5 @@
 import datetime as dt
-from django.core.exceptions import MultipleObjectsReturned
-
+from django.db.utils import IntegrityError
 from core.test_base import TestBase
 from kaja.menu.models import MenuItem, MenuItemVariation, Offer, OfferVariation, Category, Extra
 from kaja.restaurant.models import Restaurant
@@ -28,9 +27,9 @@ class MenuTestBase(TestBase):
         self.offer = self.make(Offer, restaurant=self.restaurant)
 
 
-class TestMenuIntegrity(MenuTestBase):
+class TestOfferVariation(MenuTestBase):
     def setUp(self):
-        super(TestMenuIntegrity, self).setUp()
+        super(TestOfferVariation, self).setUp()
         sos = Category.objects.create(name="Extra sos", description="Add sos to your stuff")
         self.garlic_cream = Extra.objects.create(
             name="Garlic soos", additional_price=2, category=sos
@@ -71,6 +70,7 @@ class TestMenuItemModel(MenuTestBase):
         self.assertEqual(var.variation_name, "default")
         self.assertEqual(var.name, "test menu item")
         self.assertEqual(var.description, "test description")
+        self.assertEqual(var.is_default, True)
 
     def test_menu_item_keeps_default_if_other_is_provided(self):
         item = self.make(MenuItem)
@@ -85,3 +85,34 @@ class TestMenuItemModel(MenuTestBase):
     def test_menu_item_can_access_restaurant(self):
         item = self.make(MenuItem, restaurant=self.restaurant)
         self.assertEqual(item.restaurant, self.restaurant)
+
+    def test_only_one_default_menu_item_variation_for_each_menu_item(self):
+        item = self.make(MenuItem)
+        self.assertEqual(item.variations.first().is_default, True)
+        with self.assertRaises(IntegrityError):
+            item.variations.add(
+                self.make(
+                    MenuItemVariation, variation_name="another-def", menu_item=item, is_default=True
+                )
+            )
+
+    def test_not_default_variations_can_be_added_to_item(self):
+        item = self.make(MenuItem)
+        self.make(MenuItemVariation, variation_name="whatever", menu_item=item, is_default=False)
+        var = item.variations.get(variation_name="default")
+        var.is_default = False
+        var.save()
+        self.make(MenuItemVariation, variation_name="whatever2", menu_item=item, is_default=True)
+        self.assertEqual(item.variations.filter(is_default=True).count(), 1)
+
+
+class TestOfferModel(MenuTestBase):
+    def test_offer_creates_default_offervariations_from_menuitems(self):
+        offer = self.make(Offer, restaurant=self.restaurant)
+        offer.menu_items.add(self.burger, self.chips)
+        offer.save()
+        self.assertEqual(offer.menu_items.count(), 2)
+        self.assertEqual(offer.variations.count(), 6)
+        self.assertEqual(
+            offer.variations.values_list("is_active", flat=True), [False for _ in range(6)]
+        )

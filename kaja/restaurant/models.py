@@ -1,3 +1,4 @@
+import datetime as dt
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -29,12 +30,22 @@ class Restaurant(models.Model):
     contact = models.ForeignKey(RestaurantContact, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    start_hour = models.TimeField()
+    end_hour = models.TimeField()
 
     def save(self, *args, **kwargs):
         if not self.chain_id:
             self.chain = Chain(name=f"{self.name} Chain", owner=self.contact)
             self.chain.save()
         super(Restaurant, self).save(*args, **kwargs)
+
+    @property
+    def is_open(self):
+        return self.start_hour < self._get_current_time() < self.end_hour
+
+    @staticmethod
+    def _get_current_time():
+        return dt.datetime.now().time()
 
     def __str__(self):
         return f"{self.name} - {self.chain.name}"

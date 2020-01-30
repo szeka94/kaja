@@ -19,12 +19,18 @@ class Offer(models.Model):
     name = models.CharField("Text shown to the buyer", max_length=128)
     description = models.TextField()
 
+    def save(self, *args, **kwargs):
+        super(Offer, self).save(*args, **kwargs)
+        # TODO: ask for help for this stuff...
+        """It would be nice to create the all the offervariations on initialization from the menuitems"""
+
     def __str__(self):
         return self.name
 
 
 class OfferVariation(models.Model):
     """
+        TODO:
         This is a specific combination of menuitem-variations for a given offer (eg. small burger, big chips)
     """
 
@@ -69,22 +75,34 @@ class Extra(models.Model):
 
 
 class MenuItem(models.Model):
+    """
+        Stores general information about menu-items, used to build offers.
+    """
+
     name = models.CharField(max_length=128)
     description = models.TextField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="menu_items")
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
+    offers = models.ManyToManyField(Offer, related_name="menu_items")
     is_active = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
         super(MenuItem, self).save(*args, **kwargs)
         if not self.variations.exists():
             variation = MenuItemVariation(
-                name=self.name, description=self.description, menu_item=self
+                name=self.name, description=self.description, menu_item=self, is_default=True
             )
             variation.save()
 
+    def __str__(self):
+        return self.name
+
 
 class MenuItemVariation(models.Model):
+    """
+        Different variations of a given menu-item. Like size.. etc..
+    """
+
     variation_name = models.CharField(
         "Internal name of the menu-variation", default="default", max_length=128
     )
@@ -92,6 +110,19 @@ class MenuItemVariation(models.Model):
     description = models.TextField(null=True)
     menu_item = models.ForeignKey(MenuItem, on_delete=models.CASCADE, related_name="variations")
     offer_variations = models.ManyToManyField(OfferVariation)
+    is_default = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ["menu_item", "variation_name"]
+        # TODO: play around with this and find a way to constrain the creation of 2 defualt=True
+        #       models for the same menuitem
+        constraints = [
+            models.UniqueConstraint(
+                fields=["menu_item", "is_default"],
+                condition=models.Q(is_default=True),
+                name="only_one_default",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.variation_name} - {self.name}"
