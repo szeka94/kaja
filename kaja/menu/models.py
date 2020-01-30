@@ -1,14 +1,15 @@
 from django.db import models
 
 from kaja.restaurant.models import Restaurant
+from core.mixin_model import TimestampMixin
 
 
-class Category(models.Model):
+class Category(models.Model, TimestampMixin):
     name = models.CharField(max_length=128)
     description = models.TextField()
 
 
-class Offer(models.Model):
+class Offer(models.Model, TimestampMixin):
     """
         This is an offer a menu-tile for the end-user perspective. It can contain multiple
         menus with each different menu-variations
@@ -28,7 +29,7 @@ class Offer(models.Model):
         return self.name
 
 
-class OfferVariation(models.Model):
+class OfferVariation(models.Model, TimestampMixin):
     """
         TODO:
         This is a specific combination of menuitem-variations for a given offer (eg. small burger, big chips)
@@ -60,7 +61,7 @@ class OfferVariation(models.Model):
         self._price = value
 
 
-class Extra(models.Model):
+class Extra(models.Model, TimestampMixin):
     """
         These are different extras at the end of checkout (like cheese, onion-rings etc)
     """
@@ -74,7 +75,7 @@ class Extra(models.Model):
         return self.name
 
 
-class MenuItem(models.Model):
+class MenuItem(models.Model, TimestampMixin):
     """
         Stores general information about menu-items, used to build offers.
     """
@@ -98,7 +99,7 @@ class MenuItem(models.Model):
         return self.name
 
 
-class MenuItemVariation(models.Model):
+class MenuItemVariation(models.Model, TimestampMixin):
     """
         Different variations of a given menu-item. Like size.. etc..
     """

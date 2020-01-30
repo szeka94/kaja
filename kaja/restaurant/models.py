@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from kaja.address.models import Address
+from core.mixin_model import TimestampMixin
 
 
 class RestaurantContact(User):
@@ -13,7 +14,7 @@ class RestaurantContact(User):
         self.email
 
 
-class Chain(models.Model):
+class Chain(models.Model, TimestampMixin):
     name = models.CharField(max_length=128)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -23,13 +24,11 @@ class Chain(models.Model):
         return self.name
 
 
-class Restaurant(models.Model):
+class Restaurant(models.Model, TimestampMixin):
     chain = models.ForeignKey(Chain, on_delete=models.CASCADE, related_name="restaurants")
     address = models.OneToOneField(Address, on_delete=models.CASCADE)
     name = models.CharField(max_length=128)
     contact = models.ForeignKey(RestaurantContact, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     start_hour = models.TimeField()
     end_hour = models.TimeField()
 
