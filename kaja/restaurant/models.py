@@ -10,9 +10,6 @@ class RestaurantContact(User):
     class Meta:
         proxy = True
 
-    def __str__(self):
-        self.email
-
 
 class Chain(models.Model, TimestampMixin):
     name = models.CharField(max_length=128)
@@ -32,6 +29,7 @@ class Restaurant(models.Model, TimestampMixin):
     start_hour = models.TimeField()
     end_hour = models.TimeField()
     is_card_payment = models.BooleanField(default=False)
+    cuisine = models.CharField(max_length=128)
 
     def save(self, *args, **kwargs):
         if not self.chain_id:
