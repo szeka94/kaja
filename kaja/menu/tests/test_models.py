@@ -1,4 +1,3 @@
-import datetime as dt
 from django.db.utils import IntegrityError
 from core.test_base import TestBase
 from kaja.menu.models import MenuItem, MenuItemVariation, Offer, OfferVariation, Category, Extra

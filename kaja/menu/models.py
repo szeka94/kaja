@@ -36,7 +36,7 @@ class OfferVariation(models.Model, TimestampMixin):
     """
 
     offer = models.ForeignKey(Offer, on_delete=models.CASCADE, related_name="variations")
-    _price = models.FloatField(null=True)
+    _price = models.DecimalField(null=True, max_digits=10, decimal_places=3)
     _is_active = models.BooleanField(default=True)
 
     @property
@@ -67,7 +67,9 @@ class Extra(models.Model, TimestampMixin):
     """
 
     name = models.CharField("Name of the extras stuff", max_length=128)
-    additional_price = models.FloatField("Additional price to order")
+    additional_price = models.DecimalField(
+        "Additional price to order", max_digits=10, decimal_places=3
+    )
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="extras")
     offer_variations = models.ManyToManyField(OfferVariation, related_name="extras")
 

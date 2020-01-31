@@ -31,6 +31,7 @@ class Restaurant(models.Model, TimestampMixin):
     contact = models.ForeignKey(RestaurantContact, on_delete=models.CASCADE)
     start_hour = models.TimeField()
     end_hour = models.TimeField()
+    is_card_payment = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if not self.chain_id:
