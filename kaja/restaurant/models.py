@@ -30,6 +30,7 @@ class Restaurant(models.Model, TimestampMixin):
     end_hour = models.TimeField()
     is_card_payment = models.BooleanField(default=False)
     cuisine = models.CharField(max_length=128)
+    free_delivery = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if not self.chain_id:
