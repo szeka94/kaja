@@ -92,7 +92,7 @@ class MenuItem(models.Model, TimestampMixin):
     description = models.TextField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="menu_items")
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
-    offers = models.ManyToManyField(Offer, null=True, blank=True, related_name="menu_items")
+    offers = models.ManyToManyField(Offer, blank=True, related_name="menu_items")
     is_active = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):

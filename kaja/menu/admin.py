@@ -1,6 +1,5 @@
 from django.contrib import admin
 from .models import Category, MenuItem
-from django.contrib.auth.models import User, Group
 
 
 @admin.register(Category)

@@ -1,12 +1,12 @@
 import datetime as dt
 from django.db import models
-from django.contrib.auth.models import User
+from kaja.user.models import UserProfile
 
 from kaja.address.models import Address
 from core.mixin_model import TimestampMixin
 
 
-class RestaurantContact(User):
+class RestaurantContact(UserProfile):
     class Meta:
         proxy = True
 

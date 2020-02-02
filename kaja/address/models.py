@@ -1,6 +1,7 @@
 from django.db import models
 
 from core.mixin_model import TimestampMixin
+from kaja.user.models import UserProfile
 
 
 class Address(models.Model, TimestampMixin):
@@ -11,6 +12,9 @@ class Address(models.Model, TimestampMixin):
     city = models.CharField(max_length=256)  # CHANGE THIS TO A CHOICE-FIELD
     region = models.CharField(max_length=32)  # CHANGE THIS TO A CHOICE-FIELD
     country = models.CharField(max_length=32, default="Romania")  # CHANGE THIS TO A CHOICE-FIELD
+    profile = models.ForeignKey(
+        UserProfile, null=True, on_delete=models.CASCADE, related_name="addresses"
+    )
 
     def save(self, *args, **kwargs):
         self.formated_address = (

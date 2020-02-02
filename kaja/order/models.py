@@ -1,8 +1,9 @@
 from decimal import Decimal
 from django.db import models
-from django.contrib.auth.models import User
 from django.core.validators import ValidationError
 
+from kaja.user.models import UserProfile
+from kaja.address.models import Address
 from core.mixin_model import TimestampMixin
 from kaja.menu.models import OfferVariation
 from kaja.restaurant.models import Restaurant
@@ -21,11 +22,16 @@ class Order(models.Model, TimestampMixin):
     DELIVERY = "DLV"
     ORDER_TYPES = [(PICKUP, "Pickup"), (DELIVERY, "Delivery")]
 
-    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, related_name="orders")
+    user = models.ForeignKey(
+        UserProfile, null=True, on_delete=models.SET_NULL, related_name="orders"
+    )
     variations = models.ManyToManyField(OfferVariation, related_name="orders")
     order_type = models.CharField(max_length=3, choices=ORDER_TYPES, default=DELIVERY)
     restaurant = models.ForeignKey(
         Restaurant, null=True, on_delete=models.SET_NULL, related_name="orders"
+    )
+    delivery_addess = models.ForeignKey(
+        Address, null=True, on_delete=models.SET_NULL, related_name="orders"
     )
 
     def save(self, *args, **kwargs):
@@ -40,7 +46,9 @@ class Order(models.Model, TimestampMixin):
                 raise ValidationError(
                     {"offer_variations": "Cannot create an order from two separate restaurants"}
                 )
-            if not qs.first() == self.restaurant:
+            if (
+                not qs.first()["offer__restaurant"] == self.restaurant.id
+            ):  # not sure if this is the proper way
                 raise ValidationError(
                     {"restaurant": "Offer-variation and order restaurant differs"}
                 )
@@ -52,7 +60,7 @@ class Order(models.Model, TimestampMixin):
         return self.payment.total
 
     def can_be_submitted(self):
-        return self.variations.exists()
+        return self.variations.exists() and self.delivery_addess is not None
 
 
 class OrderPayment(models.Model, TimestampMixin):
