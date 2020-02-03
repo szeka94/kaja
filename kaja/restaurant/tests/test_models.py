@@ -10,12 +10,12 @@ class TestRestaurantModel(TestBase):
     def setUp(self):
         super(TestRestaurantModel, self).setUp()
         self.address = Address.objects.create(
-            city="Kezdivasarhely",
+            city="kezdivasarhely",
             street="Stadion",
             address="nr. 7, ap. 3",
             zip_code="525400",
-            region="CV",
-            country="Romania",
+            region="cv",
+            country="romania",
         )
 
     def test_restaurant_creates_default_chain(self):
@@ -52,20 +52,20 @@ class TestChainModel(TestBase):
         super(TestChainModel, self).setUp()
         self.chain = Chain.objects.create(name="KFC", owner=self.restaurant_contact)
         self.address = Address.objects.create(
-            city="Kezdivasarhely",
+            city="kezdivasarhely",
             street="Stadion",
             address="nr. 7, ap. 3",
             zip_code="525400",
-            region="CV",
-            country="Romania",
+            region="cv",
+            country="romania",
         )
         self.address2 = Address.objects.create(
-            city="Kezdivasarhely",
+            city="kezdivasarhely",
             street="1 December",
             address="nr. 7, ap. 3",
             zip_code="525400",
-            region="CV",
-            country="Romania",
+            region="cv",
+            country="romania",
         )
 
     def test_chain_can_have_multiple_restaurants(self):

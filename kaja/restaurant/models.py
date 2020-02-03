@@ -23,7 +23,7 @@ class Chain(models.Model, TimestampMixin):
 
 class Restaurant(models.Model, TimestampMixin):
     chain = models.ForeignKey(Chain, on_delete=models.CASCADE, related_name="restaurants")
-    address = models.OneToOneField(Address, on_delete=models.CASCADE)
+    address = models.OneToOneField(Address, on_delete=models.CASCADE, related_name="restaurant")
     name = models.CharField(max_length=128)
     contact = models.ForeignKey(RestaurantContact, on_delete=models.CASCADE)
     start_hour = models.TimeField()

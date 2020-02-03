@@ -16,4 +16,11 @@ Including another URLconf
 from django.urls import path, include
 from django.contrib import admin
 
-urlpatterns = [path("admin/", admin.site.urls), path("api/", include("kaja.user.urls"))]
+from core.views import router
+
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("api/", include("kaja.user.urls", namespace="users")),
+    path("api/", include(router.urls)),
+]
