@@ -1,6 +1,7 @@
-## REMOVE ALL YOUR MIGRATIONS:
+# Kaja - food ordering application backend:
+Provides api endpoints for a food-ordering application.
 
-# Install
+## Install
 You should create a python3.7 virtual environment and install the requirements with
 ```
 pip install -r requirements.txt
